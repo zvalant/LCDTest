@@ -35,6 +35,22 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+// ILI9341 Commands
+#define ILI9341_SWRESET   0x01
+#define ILI9341_RDDID     0x04
+#define ILI9341_SLPOUT    0x11
+#define ILI9341_DISPON    0x29
+#define ILI9341_CASET     0x2A
+#define ILI9341_PASET     0x2B
+#define ILI9341_RAMWR     0x2C
+#define ILI9341_PXLFRMT   0x3A
+
+// Colors (RGB565)
+#define COLOR_RED     0xF800
+#define COLOR_GREEN   0x07E0
+#define COLOR_BLUE    0x001F
+#define COLOR_WHITE   0xFFFF
+#define COLOR_BLACK   0x0000
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -60,12 +76,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LCD_DC_PIN_Pin GPIO_PIN_1
-#define LCD_DC_PIN_GPIO_Port GPIOG
-#define LCD_RST_PIN_Pin GPIO_PIN_12
-#define LCD_RST_PIN_GPIO_Port GPIOG
-#define LCD_CS_PIN_Pin GPIO_PIN_15
-#define LCD_CS_PIN_GPIO_Port GPIOG
+#define ILI9341_DC_Pin GPIO_PIN_1
+#define ILI9341_DC_GPIO_Port GPIOG
+#define ILI9341_RST_Pin GPIO_PIN_12
+#define ILI9341_RST_GPIO_Port GPIOG
+#define ILI9341_CS_Pin GPIO_PIN_15
+#define ILI9341_CS_GPIO_Port GPIOG
 #define LD2_Pin GPIO_PIN_1
 #define LD2_GPIO_Port GPIOE
 

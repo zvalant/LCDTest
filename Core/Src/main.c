@@ -18,36 +18,15 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdbool.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdbool.h>
 //#include "ILI9341_STM32_Driver.h"
 //#include "ILI9341_GFX.h"
 
 
-// Pin definitions - adjust to your actual connections
-#define ILI9341_CS_PIN    GPIO_PIN_15
-#define ILI9341_CS_PORT   GPIOG
-#define ILI9341_DC_PIN    GPIO_PIN_1
-#define ILI9341_DC_PORT   GPIOG
-#define ILI9341_RST_PIN   GPIO_PIN_12
-#define ILI9341_RST_PORT  GPIOG
 
-// ILI9341 Commands
-#define ILI9341_SWRESET   0x01
-#define ILI9341_RDDID     0x04
-#define ILI9341_SLPOUT    0x11
-#define ILI9341_DISPON    0x29
-#define ILI9341_CASET     0x2A
-#define ILI9341_PASET     0x2B
-#define ILI9341_RAMWR     0x2C
-
-// Colors (RGB565)
-#define COLOR_RED     0xF800
-#define COLOR_GREEN   0x07E0
-#define COLOR_BLUE    0x001F
-#define COLOR_WHITE   0xFFFF
-#define COLOR_BLACK   0x0000
 
 SPI_HandleTypeDef hspi1;
 
@@ -62,25 +41,25 @@ volatile bool DMA_Transfer_Complete = false;
 
 // Low-level functions
 void ILI9341_CS_Low(void) {
-    HAL_GPIO_WritePin(ILI9341_CS_PORT, ILI9341_CS_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_RESET);
 }
 
 void ILI9341_CS_High(void) {
-    HAL_GPIO_WritePin(ILI9341_CS_PORT, ILI9341_CS_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_SET);
 }
 
 void ILI9341_DC_Low(void) {
-    HAL_GPIO_WritePin(ILI9341_DC_PORT, ILI9341_DC_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(ILI9341_DC_GPIO_Port, ILI9341_DC_Pin, GPIO_PIN_RESET);
 }
 
 void ILI9341_DC_High(void) {
-    HAL_GPIO_WritePin(ILI9341_DC_PORT, ILI9341_DC_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(ILI9341_DC_GPIO_Port, ILI9341_DC_Pin, GPIO_PIN_SET);
 }
 
 void ILI9341_Reset(void) {
-    HAL_GPIO_WritePin(ILI9341_RST_PORT, ILI9341_RST_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(ILI9341_RST_GPIO_Port, ILI9341_RST_Pin, GPIO_PIN_RESET);
     HAL_Delay(10);
-    HAL_GPIO_WritePin(ILI9341_RST_PORT, ILI9341_RST_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(ILI9341_RST_GPIO_Port, ILI9341_RST_Pin, GPIO_PIN_SET);
     HAL_Delay(120);
 }
 
@@ -120,37 +99,9 @@ void ILI9341_WritePixelData(int i , uint8_t r, uint8_t g, uint8_t b, uint8_t* fr
 
 
 
-	//HAL_SPI_Transmit(&hspi1, &r,1,HAL_MAX_DELAY);
-	//HAL_SPI_Transmit(&hspi1, &g,1,HAL_MAX_DELAY);
-	//HAL_SPI_Transmit(&hspi1, &b,1,HAL_MAX_DELAY);
-	//HAL_SPI_Transmit(&hspi1, buffer, 2, HAL_MAX_DELAY);
-
-
-
-
-
-
-
-}
-void RGB565Hex(uint8_t r, uint8_t b, uint8_t g){
-
 }
 
-// Hardware connectivity test
-uint32_t ILI9341_ReadID(void) {
-    uint8_t data[4];
 
-    ILI9341_CS_Low();
-    ILI9341_DC_Low();
-    uint8_t cmd = ILI9341_RDDID;
-    HAL_SPI_Transmit(&hspi1, &cmd, 1, HAL_MAX_DELAY);
-
-    ILI9341_DC_High();
-    HAL_SPI_Receive(&hspi1, data, 4, HAL_MAX_DELAY);
-    ILI9341_CS_High();
-
-    return (data[1] << 16) | (data[2] << 8) | data[3];
-}
 
 void ILI9341_Init(void) {
     ILI9341_Reset();
@@ -406,8 +357,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
   // First test raw SPI data transmission
 
-  // Test hardware connection
-  uint32_t id = ILI9341_ReadID();
 
   // Initialize display
   ILI9341_Init();
@@ -659,16 +608,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LCD_DC_PIN_GPIO_Port, LCD_DC_PIN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(ILI9341_DC_GPIO_Port, ILI9341_DC_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOG, LCD_RST_PIN_Pin|LCD_CS_PIN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOG, ILI9341_RST_Pin|ILI9341_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LCD_DC_PIN_Pin LCD_RST_PIN_Pin LCD_CS_PIN_Pin */
-  GPIO_InitStruct.Pin = LCD_DC_PIN_Pin|LCD_RST_PIN_Pin|LCD_CS_PIN_Pin;
+  /*Configure GPIO pins : ILI9341_DC_Pin ILI9341_RST_Pin ILI9341_CS_Pin */
+  GPIO_InitStruct.Pin = ILI9341_DC_Pin|ILI9341_RST_Pin|ILI9341_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
