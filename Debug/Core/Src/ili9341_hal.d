@@ -1,4 +1,5 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/ili9341_hal.o: ../Core/Src/ili9341_hal.c \
+ ../Core/Inc/ili9341_config.h ../Core/Inc/main.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
@@ -34,7 +35,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h \
  ../Core/Inc/stm32h7xx_nucleo_conf.h \
  ../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h \
- ../Core/Inc/gfx.h ../Core/Inc/ili9341_driver.h
+ ../Core/Inc/ili9341_hal.h
+../Core/Inc/ili9341_config.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -71,5 +73,4 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:
 ../Core/Inc/stm32h7xx_nucleo_conf.h:
 ../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h:
-../Core/Inc/gfx.h:
-../Core/Inc/ili9341_driver.h:
+../Core/Inc/ili9341_hal.h:

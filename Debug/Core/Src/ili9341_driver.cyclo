@@ -1,0 +1,8 @@
+../Core/Src/ili9341_driver.c:14:6:ILI9341_WriteCommand	1
+../Core/Src/ili9341_driver.c:23:6:ILI9341_WriteData	1
+../Core/Src/ili9341_driver.c:32:6:ILI9341_WriteData16	1
+../Core/Src/ili9341_driver.c:41:6:ILI9341_SetWindow	1
+../Core/Src/ili9341_driver.c:56:6:ILI9341_Init	1
+../Core/Src/ili9341_driver.c:79:6:TransmitFrame	3
+../Core/Src/ili9341_driver.c:96:6:Test_SPI_Data	2
+../Core/Src/ili9341_driver.c:107:6:HAL_SPI_TxCpltCallback	2

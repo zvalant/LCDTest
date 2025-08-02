@@ -1,0 +1,5 @@
+../Core/Src/ili9341_hal.c:11:6:ILI9341_CS_Low	8	static
+../Core/Src/ili9341_hal.c:15:6:ILI9341_CS_High	8	static
+../Core/Src/ili9341_hal.c:19:6:ILI9341_DC_Low	8	static
+../Core/Src/ili9341_hal.c:23:6:ILI9341_DC_High	8	static
+../Core/Src/ili9341_hal.c:27:6:ILI9341_Reset	8	static

@@ -34,23 +34,12 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+// Pin definitions
 
-// ILI9341 Commands
-#define ILI9341_SWRESET   0x01
-#define ILI9341_RDDID     0x04
-#define ILI9341_SLPOUT    0x11
-#define ILI9341_DISPON    0x29
-#define ILI9341_CASET     0x2A
-#define ILI9341_PASET     0x2B
-#define ILI9341_RAMWR     0x2C
-#define ILI9341_PXLFRMT   0x3A
+
 
 // Colors (RGB565)
-#define COLOR_RED     0xF800
-#define COLOR_GREEN   0x07E0
-#define COLOR_BLUE    0x001F
-#define COLOR_WHITE   0xFFFF
-#define COLOR_BLACK   0x0000
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

@@ -1,0 +1,5 @@
+../Core/Src/gfx.c:14:6:ILI9341_RGB565WritePixel	24	static
+../Core/Src/gfx.c:24:6:ILI9341_WritePixel	32	static
+../Core/Src/gfx.c:33:6:ILI9341_StripeTest	153632	static
+../Core/Src/gfx.c:73:6:ILI9341_RGB565FillScreen	153624	static
+../Core/Src/gfx.c:83:6:ILI9341_Test	16	static

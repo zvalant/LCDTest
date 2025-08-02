@@ -22,265 +22,25 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
+#include "gfx.h"
+#include "ili9341_driver.h"
 //#include "ILI9341_STM32_Driver.h"
 //#include "ILI9341_GFX.h"
 
 
 
 
-SPI_HandleTypeDef hspi1;
+//SPI_HandleTypeDef hspi1;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 
-//globals
-volatile bool DMA_Transfer_Complete = false;
-
-
-
-// Low-level functions
-void ILI9341_CS_Low(void) {
-    HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_RESET);
-}
-
-void ILI9341_CS_High(void) {
-    HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_SET);
-}
-
-void ILI9341_DC_Low(void) {
-    HAL_GPIO_WritePin(ILI9341_DC_GPIO_Port, ILI9341_DC_Pin, GPIO_PIN_RESET);
-}
-
-void ILI9341_DC_High(void) {
-    HAL_GPIO_WritePin(ILI9341_DC_GPIO_Port, ILI9341_DC_Pin, GPIO_PIN_SET);
-}
-
-void ILI9341_Reset(void) {
-    HAL_GPIO_WritePin(ILI9341_RST_GPIO_Port, ILI9341_RST_Pin, GPIO_PIN_RESET);
-    HAL_Delay(10);
-    HAL_GPIO_WritePin(ILI9341_RST_GPIO_Port, ILI9341_RST_Pin, GPIO_PIN_SET);
-    HAL_Delay(120);
-}
-
-void ILI9341_WriteCommand(uint8_t cmd) {
-    ILI9341_CS_Low();
-    ILI9341_DC_Low();  // Command mode
-    HAL_Delay(1);
-    HAL_SPI_Transmit(&hspi1, &cmd, 1, HAL_MAX_DELAY);
-    HAL_Delay(1);
-    ILI9341_CS_High();
-}
-
-void ILI9341_WriteData(uint8_t data) {
-    ILI9341_CS_Low();
-    ILI9341_DC_High(); // Data mode
-    HAL_Delay(1);
-    HAL_SPI_Transmit(&hspi1, &data, 1, HAL_MAX_DELAY);
-    HAL_Delay(1);
-    ILI9341_CS_High();
-}
-
-void ILI9341_WriteData16(uint16_t data) {
-    uint8_t buffer[2];
-    buffer[0] = data >> 8;    // High byte
-    buffer[1] = data & 0xFF;  // Low byte
-    ILI9341_CS_Low();
-    ILI9341_DC_High();
-    HAL_SPI_Transmit(&hspi1, buffer, 2, HAL_MAX_DELAY);
-}
-void ILI9341_WritePixelData(int i , uint8_t r, uint8_t g, uint8_t b, uint8_t* frameBuffer){
-	uint16_t data = ((r>>3)<<11)|((g>>2)<<5)|(b>>3);
-	uint8_t buffer[2];
-	uint8_t dataBit1 = data>>8;
-	uint8_t dataBit2 = data&0xFF;
-	frameBuffer[2*i] = dataBit1;
-	frameBuffer[(2*i)+1] = dataBit2;
-
-
-
-}
-
-
-
-void ILI9341_Init(void) {
-    ILI9341_Reset();
-
-    // Software reset
-    ILI9341_WriteCommand(ILI9341_SWRESET);
-    HAL_Delay(150);
-
-    // Sleep out
-    ILI9341_WriteCommand(ILI9341_SLPOUT);
-    HAL_Delay(120);
-    ILI9341_WriteCommand(0x3A);
-    ILI9341_WriteData(0x55);
-    ILI9341_WriteCommand(0x36);
-    ILI9341_WriteData(0x08);
-
-    // Display on
-    ILI9341_WriteCommand(ILI9341_DISPON);
-    HAL_Delay(120);
-
-}
-
-void ILI9341_SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
-    // Column address set
-    ILI9341_WriteCommand(ILI9341_CASET);
-    ILI9341_WriteData16(x0);
-    ILI9341_WriteData16(x1);
-
-    // Page address set
-    ILI9341_WriteCommand(ILI9341_PASET);
-    ILI9341_WriteData16(y0);
-    ILI9341_WriteData16(y1);
-
-    // Memory write
-    ILI9341_WriteCommand(ILI9341_RAMWR);
-}
-
-void ILI9341_FillScreen(uint16_t color, uint8_t rowCounter) {
-
-    uint8_t color1 = 255;
-    uint8_t color2 = 0;
-    uint8_t color3 = 0;
-    uint8_t frameBuffer[153600];
-    int section = 51200;
-    int sectionCount = 153600/section;
-
-    for(int i = 0; i < 76800; i++) {
-    	if(i%1920==0){
-    		rowCounter++;
-    		switch(rowCounter%3){
-    		case 0:
-    			color1 = 255;
-    			color2 = 127;
-    			color3 = 80;
-    			break;
-    		case 1:
-    			color1 = 46;
-    			color2 = 139;
-    			color3 = 87;
-    			break;
-    		case 2:
-    			color1 = 255;
-    			color2 = 245;
-    			color3 = 238;
-    			break;
-    		default:
-    			break;
-    		}
-
-    	}
-    	//ILI9341_WriteData16(color);
-
-        ILI9341_WritePixelData(i, color1,color2,color3, frameBuffer);
-
-    }// 240 * 320 pixels
-    ILI9341_SetWindow(0, 0, 239, 319);
-	ILI9341_CS_Low();
-	ILI9341_DC_High();
-    for (int i = 0; i <sectionCount;i++){
-    	HAL_SPI_Transmit_DMA(&hspi1, &frameBuffer[i*section], section);
-        while(!DMA_Transfer_Complete);
-        DMA_Transfer_Complete = false;
-    }
-
-	ILI9341_CS_High();
-	HAL_Delay(100);
-}
-
-void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
-    if(x >= 240 || y >= 320) return;
-
-    ILI9341_SetWindow(x, y, x, y);
-    ILI9341_WriteData16(color);
-}
 
 // Simple test pattern
-void ILI9341_TestPattern(void) {
-    // Fill screen with different colors to test
-	int frameCounter = 0;
-	while(1){
-		frameCounter++;
-	    ILI9341_FillScreen(COLOR_RED, frameCounter);
 
 
-	}
-    HAL_Delay(1000);
 
-    ILI9341_FillScreen(COLOR_GREEN, 0);
-    HAL_Delay(1000);
-
-    ILI9341_FillScreen(COLOR_BLUE, 0);
-    HAL_Delay(1000);
-
-    ILI9341_FillScreen(COLOR_WHITE, 0);
-    HAL_Delay(1000);
-
-    // Draw simple pattern
-    ILI9341_FillScreen(COLOR_BLACK, 0);
-
-    // Draw colored squares
-    for(int x = 0; x < 240; x += 40) {
-        for(int y = 0; y < 320; y += 40) {
-            uint16_t color = (x + y) % 120 == 0 ? COLOR_RED :
-                           (x + y) % 80 == 0 ? COLOR_GREEN : COLOR_BLUE;
-
-            for(int i = 0; i < 30; i++) {
-                for(int j = 0; j < 30; j++) {
-                    ILI9341_DrawPixel(x + i, y + j, color);
-                }
-            }
-        }
-    }
-}
-
-// Simple test to verify SPI data transmission
-void Test_SPI_Data(void) {
-    uint8_t test_data = 0xFF;
-
-    for(int i = 0; i < 20; i++) {
-        ILI9341_CS_Low();
-        ILI9341_DC_High();
-        HAL_SPI_Transmit(&hspi1, &test_data, 1, HAL_MAX_DELAY);
-        ILI9341_CS_High();
-        HAL_Delay(200);
-    }
-}
-
-// Test PD7 GPIO functionality before SPI
-void Test_PD7_GPIO(void) {
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-    __HAL_RCC_GPIOD_CLK_ENABLE();
-
-    // Configure PD7 as regular GPIO output for testing
-    GPIO_InitStruct.Pin = GPIO_PIN_7;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-    // Toggle PD7 10 times
-    for(int i = 0; i < 20; i++) {
-        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_7);
-        HAL_Delay(10);
-    }
-
-    // Set back to low
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
-}
-void SPITest(void){
-	ILI9341_CS_Low();
-	ILI9341_DC_High();
-
-}
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
-    if(hspi->Instance == SPI1) {
-    	DMA_Transfer_Complete = true;  // YOU set your own flag
-    }
-}
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -301,7 +61,6 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
 /* Private variables ---------------------------------------------------------*/
 
 COM_InitTypeDef BspCOMInit;
-
 SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
 
@@ -360,78 +119,12 @@ int main(void)
 
   // Initialize display
   ILI9341_Init();
-  Test_SPI_Data();
+  ///ILI9341_Test();
 
 
 
   // Run test pattern
-  while(1) {
-      ILI9341_TestPattern();
-      HAL_Delay(1000);
-  }
-  /*
-   *
-  ILI9341_Init();
-
-  // Simple Text writing (Text, Font, X, Y, Color, BackColor)
-  // Available Fonts are FONT1, FONT2, FONT3 and FONT4
-  ILI9341_FillScreen(WHITE);
-  ILI9341_SetRotation(SCREEN_HORIZONTAL_2);
-  ILI9341_DrawText("HELLO WORLD", FONT4, 90, 110, BLACK, WHITE);
-  HAL_Delay(1000);
-
-  //Writing numbers
-  ILI9341_FillScreen(WHITE);
-  static char BufferText[30];
-  for(uint8_t i = 0; i <= 5; i++){
-    sprintf(BufferText, "COUNT : %d", i);
-    ILI9341_DrawText(BufferText, FONT3, 10, 10, BLACK, WHITE);
-    ILI9341_DrawText(BufferText, FONT3, 10, 30, BLUE, WHITE);
-    ILI9341_DrawText(BufferText, FONT3, 10, 50, RED, WHITE);
-    ILI9341_DrawText(BufferText, FONT3, 10, 70, GREEN, WHITE);
-    ILI9341_DrawText(BufferText, FONT3, 10, 90, YELLOW, WHITE);
-    ILI9341_DrawText(BufferText, FONT3, 10, 110, PURPLE, WHITE);
-    ILI9341_DrawText(BufferText, FONT3, 10, 130, ORANGE, WHITE);
-    ILI9341_DrawText(BufferText, FONT3, 10, 150, MAROON, WHITE);
-    ILI9341_DrawText(BufferText, FONT3, 10, 170, WHITE, BLACK);
-    ILI9341_DrawText(BufferText, FONT3, 10, 190, BLUE, BLACK);
-  }
-
-  // Horizontal Line (X, Y, Length, Color)
-  ILI9341_FillScreen(WHITE);
-  ILI9341_DrawHLine(50, 120, 200, NAVY);
-  HAL_Delay(1000);
-
-  // Vertical Line (X, Y, Length, Color)
-  ILI9341_FillScreen(WHITE);
-  ILI9341_DrawVLine(160, 40, 150, DARKGREEN);
-  HAL_Delay(1000);
-
-  // Hollow Circle (Centre X, Centre Y, Radius, Color)
-  ILI9341_FillScreen(WHITE);
-  ILI9341_DrawHollowCircle(160, 120, 80, PINK);
-  HAL_Delay(1000);
-
-  // Filled Circle (Centre X, Centre Y, Radius, Color)
-  ILI9341_FillScreen(WHITE);
-  ILI9341_DrawFilledCircle(160, 120, 50, CYAN);
-  HAL_Delay(1000);
-
-  // Filled Rectangle (Start X, Start Y, Length X, Length Y)
-  ILI9341_FillScreen(WHITE);
-  ILI9341_DrawRectangle(50, 50, 220, 140, GREENYELLOW);
-  HAL_Delay(1000);
-
-  // Hollow Rectangle (Start X, Start Y, End X, End Y)
-  ILI9341_FillScreen(WHITE);
-  ILI9341_DrawHollowRectangleCoord(50, 50, 270, 190, DARKCYAN);
-  HAL_Delay(1000);
-
-  // Simple Pixel Only (X, Y, Color)
-  ILI9341_FillScreen(WHITE);
-  ILI9341_DrawPixel(100, 100, BLACK);
-  HAL_Delay(1000);
-*/
+  ILI9341_Test();
   /* USER CODE END 2 */
 
   /* Initialize leds */
