@@ -72,7 +72,7 @@ void ILI9341_StripeTest( uint8_t rowCounter) {
 
 void ILI9341_RGB565FillScreen(uint16_t color){
 	uint8_t frameBuffer[153600];
-	for (uint8_t i = 0; i<76800;i++){
+	for (uint32_t i = 0; i<76800;i++){
 		ILI9341_WritePixel(i,color,frameBuffer);
 	}
 	TransmitFrame(239,319,&frameBuffer);
@@ -81,16 +81,18 @@ void ILI9341_RGB565FillScreen(uint16_t color){
 }
 
 void ILI9341_Test(void){
-	//ILI9341_RGB565FillScreen(COLOR_RED);
-	//ILI9341_RGB565FillScreen(COLOR_GREEN);
-	//ILI9341_RGB565FillScreen(COLOR_BLUE);
-	//ILI9341_RGB565FillScreen(COLOR_BLACK);
-	//ILI9341_RGB565FillScreen(COLOR_WHITE);
+	ILI9341_RGB565FillScreen(COLOR_RED);
+	ILI9341_RGB565FillScreen(COLOR_GREEN);
+	ILI9341_RGB565FillScreen(COLOR_BLUE);
+	ILI9341_RGB565FillScreen(COLOR_BLACK);
+	ILI9341_RGB565FillScreen(COLOR_WHITE);
 	uint8_t i = 0;
 	while (i<10){
 		ILI9341_StripeTest(i);
 		i++;
+
 	}
+	ILI9341_RGB565FillScreen(COLOR_WHITE);
 
 
 

@@ -90,6 +90,8 @@ void TransmitFrame(uint16_t height, uint16_t width, uint8_t* frameBuffer){
     }
 
 	ILI9341_CS_High();
+	//slight delay for static frame to stabilize
+	HAL_Delay(2);
 
 
 }
