@@ -1,5 +1,0 @@
-../Core/Src/gfx.c:14:6:ILI9341_RGB565WritePixel	1
-../Core/Src/gfx.c:24:6:ILI9341_WritePixel	1
-../Core/Src/gfx.c:33:6:ILI9341_StripeTest	7
-../Core/Src/gfx.c:73:6:ILI9341_RGB565FillScreen	2
-../Core/Src/gfx.c:83:6:ILI9341_Test	2

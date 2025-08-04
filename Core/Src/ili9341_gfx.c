@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <ili9341_driver.h>
-#include "gfx.h"
+#include <ili9341_gfx.h>
 
 
 
@@ -21,7 +21,7 @@ void ILI9341_RGB565WritePixel(uint32_t i , uint8_t r, uint8_t g, uint8_t b, uint
 
 
 }
-void ILI9341_WritePixel(uint32_t i, uint16_t color, uint8_t* frameBuffer){
+void ILI9341_HexWritePixel(uint32_t i, uint16_t color, uint8_t* frameBuffer){
 	uint8_t highByte = color >>8;
 	uint8_t lowByte = color&0xFF;
 	frameBuffer[i*2] = highByte;
@@ -73,7 +73,7 @@ void ILI9341_StripeTest( uint8_t rowCounter) {
 void ILI9341_RGB565FillScreen(uint16_t color){
 	uint8_t frameBuffer[153600];
 	for (uint32_t i = 0; i<76800;i++){
-		ILI9341_WritePixel(i,color,frameBuffer);
+		ILI9341_HexWritePixel(i,color,frameBuffer);
 	}
 	TransmitFrame(239,319,&frameBuffer);
 

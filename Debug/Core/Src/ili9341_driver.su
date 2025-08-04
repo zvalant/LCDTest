@@ -3,6 +3,6 @@
 ../Core/Src/ili9341_driver.c:32:6:ILI9341_WriteData16	24	static
 ../Core/Src/ili9341_driver.c:41:6:ILI9341_SetWindow	24	static
 ../Core/Src/ili9341_driver.c:56:6:ILI9341_Init	8	static
-../Core/Src/ili9341_driver.c:79:6:TransmitFrame	32	static
+../Core/Src/ili9341_driver.c:80:6:TransmitFrame	32	static
 ../Core/Src/ili9341_driver.c:98:6:Test_SPI_Data	16	static
 ../Core/Src/ili9341_driver.c:109:6:HAL_SPI_TxCpltCallback	16	static

@@ -12,15 +12,19 @@
 
 
 // ILI9341 Commands
-#define ILI9341_SWRESET   0x01
-#define ILI9341_RDDID     0x04
-#define ILI9341_SLPOUT    0x11
-#define ILI9341_DISPON    0x29
-#define ILI9341_CASET     0x2A
-#define ILI9341_PASET     0x2B
-#define ILI9341_RAMWR     0x2C
-#define ILI9341_PXLFRMT   0x3A
-#define ILI9341_RGBORDER  0x36
+#define ILI9341_SWRESET     0x01
+#define ILI9341_RDDID       0x04
+#define ILI9341_SLPOUT      0x11
+#define ILI9341_DISPON      0x29
+#define ILI9341_CASET       0x2A
+#define ILI9341_PASET       0x2B
+#define ILI9341_RAMWR       0x2C
+#define ILI9341_PXLFRMT     0x3A
+#define ILI9341_RGBORDER    0x36
+#define ILI9341_FRAMECTLON  0xB1
+#define ILI9341_FRAMECTLOFF 0xB2
+#define ILI9341_FRAMECTLP   0xB3
+
 
 //SPI transmission calls
 void ILI9341_WriteCommand(uint8_t cmd);

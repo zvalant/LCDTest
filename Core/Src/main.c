@@ -17,13 +17,14 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <ili9341_gfx.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
-#include "gfx.h"
 #include "ili9341_driver.h"
+#include "ili9341_config.h"
 //#include "ILI9341_STM32_Driver.h"
 //#include "ILI9341_GFX.h"
 
@@ -61,6 +62,7 @@ static void MX_SPI1_Init(void);
 /* Private variables ---------------------------------------------------------*/
 
 COM_InitTypeDef BspCOMInit;
+
 SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
 
@@ -119,11 +121,7 @@ int main(void)
 
   // Initialize display
   ILI9341_Init();
-  ///ILI9341_Test();
-
-
-
-  // Run test pattern
+  //basic screen Test
   ILI9341_Test();
   /* USER CODE END 2 */
 
@@ -187,7 +185,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 2;
   RCC_OscInitStruct.PLL.PLLN = 72;
   RCC_OscInitStruct.PLL.PLLP = 4;
-  RCC_OscInitStruct.PLL.PLLQ = 6;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;

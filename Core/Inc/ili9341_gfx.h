@@ -5,8 +5,11 @@
  *      Author: zac23
  */
 
-#ifndef INC_GFX_H_
-#define INC_GFX_H_
+#ifndef INC_ILI9341_GFX_H_
+#define INC_ILI9341_GFX_H_
+
+#include <stdint.h>
+
 
 #define COLOR_RED     0xF800
 #define COLOR_GREEN   0x07E0
@@ -22,4 +25,4 @@ void ILI9341_RGB565FillScreen(uint16_t color);
 
 
 
-#endif /* INC_GFX_H_ */
+#endif /* INC_ILI9341_GFX_H_ */

@@ -67,6 +67,7 @@ void ILI9341_Init(void) {
     ILI9341_WriteData(0x55);
     ILI9341_WriteCommand(ILI9341_RGBORDER);
     ILI9341_WriteData(0x08);
+    ILI9341_WriteCommand(0x35);
 
     // Display on
     ILI9341_WriteCommand(ILI9341_DISPON);
@@ -88,7 +89,6 @@ void TransmitFrame(uint16_t height, uint16_t width, uint8_t* frameBuffer){
         while(!DMA_Transfer_Complete);
         DMA_Transfer_Complete = false;
     }
-
 	ILI9341_CS_High();
 	//slight delay for static frame to stabilize
 	HAL_Delay(2);
