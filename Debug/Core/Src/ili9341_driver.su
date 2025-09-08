@@ -1,8 +1,9 @@
-../Core/Src/ili9341_driver.c:14:6:ILI9341_WriteCommand	16	static
-../Core/Src/ili9341_driver.c:23:6:ILI9341_WriteData	16	static
-../Core/Src/ili9341_driver.c:32:6:ILI9341_WriteData16	24	static
-../Core/Src/ili9341_driver.c:41:6:ILI9341_SetWindow	24	static
-../Core/Src/ili9341_driver.c:56:6:ILI9341_Init	8	static
-../Core/Src/ili9341_driver.c:80:6:TransmitFrame	32	static
-../Core/Src/ili9341_driver.c:98:6:Test_SPI_Data	16	static
-../Core/Src/ili9341_driver.c:109:6:HAL_SPI_TxCpltCallback	16	static
+../Core/Src/ili9341_driver.c:20:18:ILI9341_WriteCommand	24	static
+../Core/Src/ili9341_driver.c:31:18:ILI9341_WriteData	24	static
+../Core/Src/ili9341_driver.c:42:18:ILI9341_WriteData16	24	static
+../Core/Src/ili9341_driver.c:53:18:ILI9341_SetWindow	32	static
+../Core/Src/ili9341_driver.c:74:18:ILI9341_Init	8	static
+../Core/Src/ili9341_driver.c:99:18:TransmitFrame	32	static
+../Core/Src/ili9341_driver.c:126:6:Test_SPI_Data	16	static
+../Core/Src/ili9341_driver.c:138:18:TransmitFrameRemainder	32	static
+../Core/Src/ili9341_driver.c:154:6:HAL_SPI_TxCpltCallback	16	static

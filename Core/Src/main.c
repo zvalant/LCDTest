@@ -25,6 +25,7 @@
 #include <stdbool.h>
 #include "ili9341_driver.h"
 #include "ili9341_config.h"
+#include "ili9341_gfx.h"
 
 
 
@@ -116,12 +117,14 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   // First test raw SPI data transmission
+  static ILI9341_GFX_FrameBuffer_t gfx_FrameBuffer;
+  ILI9341_GFX_Init(&gfx_FrameBuffer);
 
 
   // Initialize display
   ILI9341_Init();
   //basic screen Test
-  ILI9341_Test();
+  ILI9341_Test(&gfx_FrameBuffer);
   /* USER CODE END 2 */
 
   /* Initialize leds */

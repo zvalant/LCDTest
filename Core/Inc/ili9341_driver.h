@@ -9,6 +9,8 @@
 #define INC_ILI9341_DRIVER_H_
 
 #include <stdint.h>
+#include <stdbool.h>
+#include "ili9341_config.h"
 
 
 // ILI9341 Commands
@@ -26,14 +28,27 @@
 #define ILI9341_FRAMECTLP   0xB3
 
 
+
+
+
+typedef enum {
+	ILI9341_OK = 0,
+	ILI9341_ERROR,
+	ILI9341_TIMEOUT,
+	ILI9341_BUSY
+} ILI9341_Result_t;
+
+
 //SPI transmission calls
-void ILI9341_WriteCommand(uint8_t cmd);
-void ILI9341_WriteData(uint8_t data);
-void ILI9341_WriteData16(uint16_t data);
+ILI9341_Result_t ILI9341_WriteCommand(uint8_t cmd);
+ILI9341_Result_t ILI9341_WriteData(uint8_t data);
+ILI9341_Result_t ILI9341_WriteData16(uint16_t data);
 void ILI9341_565RGBWritePixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t* frameBuffer);
 //Initialization sequence
-void ILI9341_Init(void);
-void TransmitFrame(uint16_t height, uint16_t width, uint8_t* frameBuffer);
+ILI9341_Result_t ILI9341_Init(void);
+ILI9341_Result_t TransmitFrame(const uint8_t *frameBuffer);
+ILI9341_Result_t TransmitFrameRemainder(const uint8_t* frameBuffer);
+ILI9341_Result_t ILI9341_SetWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
 
 
