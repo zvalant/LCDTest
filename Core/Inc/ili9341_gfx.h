@@ -10,8 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "ili9341_config.h"
-
+#include "ili9341_driver.h"
 
 #define COLOR_RED     0xF800
 #define COLOR_GREEN   0x07E0
@@ -21,12 +20,6 @@
 #define COLOR_YELLOW  0xFFE0
 #define COLOR_CYAN    0x07FF
 #define COLOR_MAGENTA 0xF81F
-
-typedef struct {
-	uint16_t x;
-	uint16_t y;
-
-} ILI9341_Point_t;
 
 
 typedef struct {
@@ -38,7 +31,7 @@ typedef struct {
 } ILI9341_Rect_t;
 
 typedef struct {
-	uint8_t data[ILI9341_FRAME_BUFFER_SIZE];
+	uint8_t data[ILI9341_FRAME_BUFFER_SIZE_BYTES];
 	bool dirty;
 	uint16_t width;
 	uint16_t height;
@@ -52,32 +45,8 @@ typedef enum {
 	ILI9341_GFX_BOUNDRY_ERROR,
 } ILI9341_GFX_Result_t;
 
-
-
-
-
-
-
-
-
-
-/*
-typedef struct {
-	uint8_t data[ILI9341_FRAME_BUFFER_SIZE];
-	bool dirty;
-} ILI9341_FrameBuffer_t;
-
-*/
-//ILI9341_Result_t ILI9341_GFX_FillScreen(ILI9341_FrameBuffer_t*fb, uint16_t color);
-
-ILI9341_GFX_Result_t ILI9341_GFX_FillScreen(ILI9341_GFX_FrameBuffer_t *fb, uint16_t color);
-ILI9341_GFX_Result_t ILI9341_GFX_Clear(ILI9341_GFX_FrameBuffer_t* fb);
-
-void ILI9341_RGB565FillScreen(uint16_t color);
-uint32_t GetBufferIndex(uint16_t x, uint16_t y);
-bool ValidCoordinates(uint16_t x, uint16_t y);
-
-
-
+ILI9341_GFX_Result_t ILI9341_GFX_FillScreen(ILI9341_GFX_FrameBuffer_t *fb,
+		uint16_t color);
+ILI9341_GFX_Result_t ILI9341_GFX_Clear(ILI9341_GFX_FrameBuffer_t *fb);
 
 #endif /* INC_ILI9341_GFX_H_ */
