@@ -48,5 +48,6 @@ typedef enum {
 ILI9341_GFX_Result_t ILI9341_GFX_FillScreen(ILI9341_GFX_FrameBuffer_t *fb,
 		uint16_t color);
 ILI9341_GFX_Result_t ILI9341_GFX_Clear(ILI9341_GFX_FrameBuffer_t *fb);
+ILI9341_GFX_Result_t ILI9341_GFX_Init(ILI9341_GFX_FrameBuffer_t *fb);
 
 #endif /* INC_ILI9341_GFX_H_ */

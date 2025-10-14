@@ -9,6 +9,8 @@
 #include "ili9341_hal.h"
 #include <stdbool.h>
 #include <math.h>
+#include "cmsis_os.h"
+
 
 extern SPI_HandleTypeDef ILI9341_SPI_HANDLE;
 
@@ -18,6 +20,8 @@ struct ili9341_driver {
 };
 
 static struct ili9341_driver this = { 0 };
+
+extern osSemaphoreId_t DmaTxCompleteHandle;
 ILI9341_Driver_Result_t ILI9341_Write_Command(uint8_t cmd) {
 	ILI9341_CS_Low();
 	ILI9341_DC_Low();  // Command mode
@@ -145,15 +149,50 @@ ILI9341_Driver_Result_t ILI9341_Transmit_Frame(const uint8_t *frameBuffer) {
 	return (ILI9341_DRIVER_OK);
 }
 
+ILI9341_Driver_Result_t ILI9341_Transmit_Frame1(const uint8_t *frameBuffer) {
+	if (frameBuffer == NULL) {
+		return ILI9341_DRIVER_ERROR;
+	}
+	if (ILI9341_SetWindow(0, 0, ILI9341_WIDTH_PIXELS - 1,
+	ILI9341_HEIGHT_PIXELS - 1) != ILI9341_DRIVER_OK) {
+		return ILI9341_DRIVER_ERROR;
+	};
+	uint32_t remainingBytes = ILI9341_FRAME_BUFFER_SIZE_BYTES;
+	uint32_t offset = 0;
+	ILI9341_CS_Low();
+	ILI9341_DC_High();
+	while (remainingBytes > 0) {
+
+		uint32_t transmitLength = fmin(ILI9341_DMA_CHUNK_SIZE_BYTES,
+				remainingBytes);
+		HAL_StatusTypeDef result = HAL_SPI_Transmit_DMA(&ILI9341_SPI_HANDLE,
+				(uint8_t*) &frameBuffer[offset], transmitLength);
+		if (result != HAL_OK) {
+			ILI9341_CS_High();
+			return ILI9341_DRIVER_ERROR;
+		}
+			;  //SPI DMA can only handle 1 transmission at a time
+		offset = offset + transmitLength;
+		remainingBytes = remainingBytes - transmitLength;
+		osSemaphoreAcquire(DmaTxCompleteHandle, osWaitForever);
+		osDelay(2);
+
+	}
+	ILI9341_CS_High();
+	return ILI9341_DRIVER_OK;
+
+}
+
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
 	if (hspi->Instance == SPI1) {
-		__disable_irq();
+	osSemaphoreRelease(DmaTxCompleteHandle);
 		if (this.activeDMATransmissions > 0) {
 			this.activeDMATransmissions--;
 		}
-		__enable_irq();
 	}
 }
+
+
 
 void Test_SPIData(void) {
 	uint8_t test_data = 0xFF;

@@ -10,6 +10,8 @@
 #include <ili9341_driver.h>
 #include <ili9341_gfx.h>
 #include <string.h>
+#include "cmsis_os.h"
+
 
 uint32_t GetBufferIndex(uint16_t x, uint16_t y, ILI9341_GFX_FrameBuffer_t *fb) {
 	return (uint32_t) (y * fb->width + x) * ILI9341_BYTES_PER_PIXEL;
@@ -32,6 +34,7 @@ ILI9341_GFX_Result_t ILI9341_GFX_Init(ILI9341_GFX_FrameBuffer_t *fb) {
 	return ILI9341_GFX_OK;
 
 }
+
 
 ILI9341_GFX_Result_t ILI9341_GFX_Clear(ILI9341_GFX_FrameBuffer_t *fb) {
 	uint16_t color = COLOR_WHITE;
@@ -108,6 +111,38 @@ ILI9341_GFX_Result_t ILI9341_StripeTest(ILI9341_GFX_FrameBuffer_t *fb,
 	return frameResult;
 }
 
+ILI9341_GFX_Result_t ILI9341_WriteStripe(ILI9341_GFX_FrameBuffer_t *fb){
+	uint16_t stripeWidth = 10 * fb->width;
+	uint16_t color = COLOR_WHITE; //set to default color
+	static uint16_t rowCounter = 0;
+
+	for (uint32_t i = 0; i < fb->width * fb->height; i++) {
+		if (i % stripeWidth == 0) {
+			rowCounter++;
+			switch (rowCounter % 4) {
+			case 0:
+				color = COLOR_BLUE;
+				break;
+			case 1:
+				color = COLOR_CYAN;
+				break;
+			case 2:
+				color = COLOR_MAGENTA;
+				break;
+			case 3:
+				color = COLOR_RED;
+				break;
+			default:
+				break;
+			}
+
+		}
+		ILI9341_GFX_SetPixel(fb, i % fb->width, i / fb->width, color);
+	}
+	return ILI9341_GFX_OK;
+
+}
+
 ILI9341_GFX_Result_t ILI9341_Test(ILI9341_GFX_FrameBuffer_t *fb) {
 	ILI9341_GFX_Result_t result;
 	uint16_t testColorBuffer[5] = { COLOR_RED, COLOR_GREEN, COLOR_BLUE,
@@ -121,7 +156,7 @@ ILI9341_GFX_Result_t ILI9341_Test(ILI9341_GFX_FrameBuffer_t *fb) {
 	}
 	result = ILI9341_GFX_Clear(fb);
 	uint8_t i = 0;
-	while (true) {
+	while (i<10) {
 		ILI9341_StripeTest(fb, i);
 		i++;
 
@@ -130,3 +165,4 @@ ILI9341_GFX_Result_t ILI9341_Test(ILI9341_GFX_FrameBuffer_t *fb) {
 	return result;
 
 }
+

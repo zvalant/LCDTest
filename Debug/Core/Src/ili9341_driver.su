@@ -1,8 +1,9 @@
-../Core/Src/ili9341_driver.c:21:25:ILI9341_Write_Command	24	static
-../Core/Src/ili9341_driver.c:31:25:ILI9341_Write_Data8	24	static
-../Core/Src/ili9341_driver.c:41:25:ILI9341_Write_Data16	24	static
-../Core/Src/ili9341_driver.c:53:25:ILI9341_SetWindow	32	static
-../Core/Src/ili9341_driver.c:83:25:ILI9341_Driver_Init	8	static
-../Core/Src/ili9341_driver.c:105:25:ILI9341_Transmit_Frame	32	static,ignoring_inline_asm
-../Core/Src/ili9341_driver.c:148:6:HAL_SPI_TxCpltCallback	16	static,ignoring_inline_asm
-../Core/Src/ili9341_driver.c:158:6:Test_SPIData	16	static
+../Core/Src/ili9341_driver.c:25:25:ILI9341_Write_Command	24	static
+../Core/Src/ili9341_driver.c:35:25:ILI9341_Write_Data8	24	static
+../Core/Src/ili9341_driver.c:45:25:ILI9341_Write_Data16	24	static
+../Core/Src/ili9341_driver.c:57:25:ILI9341_SetWindow	32	static
+../Core/Src/ili9341_driver.c:87:25:ILI9341_Driver_Init	8	static
+../Core/Src/ili9341_driver.c:109:25:ILI9341_Transmit_Frame	32	static,ignoring_inline_asm
+../Core/Src/ili9341_driver.c:152:25:ILI9341_Transmit_Frame1	32	static
+../Core/Src/ili9341_driver.c:186:6:HAL_SPI_TxCpltCallback	16	static
+../Core/Src/ili9341_driver.c:197:6:Test_SPIData	16	static
