@@ -62,6 +62,23 @@ ILI9341_GFX_Result_t ILI9341_GFX_FillScreen(ILI9341_GFX_FrameBuffer_t *fb,
 	return result;
 
 }
+
+ILI9341_GFX_Result_t ILI9341_GFX_FillScreen1(ILI9341_GFX_FrameBuffer_t *fb,
+		uint16_t color){
+	if (fb == NULL) {
+			return ILI9341_GFX_INVALID_PARAMETER;
+		}
+		uint8_t colorHigh = (color >> 8);
+		uint8_t colorLow = (color & 0xFF);
+		for (uint32_t i = 0; i < fb->width * fb->height; i++) {
+			fb->data[i * 2] = colorHigh;
+			fb->data[(i * 2) + 1] = colorLow;
+
+		}
+
+		fb->dirty = false;
+		return ILI9341_GFX_OK;
+}
 ILI9341_GFX_Result_t ILI9341_GFX_SetPixel(ILI9341_GFX_FrameBuffer_t *fb,
 		uint16_t x, uint16_t y, uint16_t color) {
 	ILI9341_GFX_Result_t result = ILI9341_GFX_OK;
@@ -111,10 +128,9 @@ ILI9341_GFX_Result_t ILI9341_StripeTest(ILI9341_GFX_FrameBuffer_t *fb,
 	return frameResult;
 }
 
-ILI9341_GFX_Result_t ILI9341_WriteStripe(ILI9341_GFX_FrameBuffer_t *fb){
+ILI9341_GFX_Result_t ILI9341_WriteStripe(ILI9341_GFX_FrameBuffer_t *fb, uint16_t rowCounter){
 	uint16_t stripeWidth = 10 * fb->width;
 	uint16_t color = COLOR_WHITE; //set to default color
-	static uint16_t rowCounter = 0;
 
 	for (uint32_t i = 0; i < fb->width * fb->height; i++) {
 		if (i % stripeWidth == 0) {

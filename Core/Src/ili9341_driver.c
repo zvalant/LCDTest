@@ -175,7 +175,6 @@ ILI9341_Driver_Result_t ILI9341_Transmit_Frame1(const uint8_t *frameBuffer) {
 		offset = offset + transmitLength;
 		remainingBytes = remainingBytes - transmitLength;
 		osSemaphoreAcquire(DmaTxCompleteHandle, osWaitForever);
-		osDelay(2);
 
 	}
 	ILI9341_CS_High();

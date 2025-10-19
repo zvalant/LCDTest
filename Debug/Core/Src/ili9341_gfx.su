@@ -3,7 +3,8 @@
 ../Core/Src/ili9341_gfx.c:24:22:ILI9341_GFX_Init	16	static
 ../Core/Src/ili9341_gfx.c:39:22:ILI9341_GFX_Clear	24	static
 ../Core/Src/ili9341_gfx.c:47:22:ILI9341_GFX_FillScreen	24	static
-../Core/Src/ili9341_gfx.c:65:22:ILI9341_GFX_SetPixel	32	static
-../Core/Src/ili9341_gfx.c:81:22:ILI9341_StripeTest	32	static
-../Core/Src/ili9341_gfx.c:114:22:ILI9341_WriteStripe	32	static
-../Core/Src/ili9341_gfx.c:146:22:ILI9341_Test	32	static
+../Core/Src/ili9341_gfx.c:66:22:ILI9341_GFX_FillScreen1	24	static
+../Core/Src/ili9341_gfx.c:82:22:ILI9341_GFX_SetPixel	32	static
+../Core/Src/ili9341_gfx.c:98:22:ILI9341_StripeTest	32	static
+../Core/Src/ili9341_gfx.c:131:22:ILI9341_WriteStripe	32	static
+../Core/Src/ili9341_gfx.c:162:22:ILI9341_Test	32	static

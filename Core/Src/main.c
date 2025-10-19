@@ -192,7 +192,7 @@ int main(void)
   FreeFrameQueueHandle = osMessageQueueNew (5, sizeof(uint32_t), &FreeFrameQueue_attributes);
 
   /* creation of FrameTxQueue */
-  FrameTxQueueHandle = osMessageQueueNew (5, sizeof(uint16_t), &FrameTxQueue_attributes);
+  FrameTxQueueHandle = osMessageQueueNew (5, sizeof(uint32_t), &FrameTxQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   osMessageQueuePut(FreeFrameQueueHandle, &buf1, 0, 0);
@@ -438,18 +438,19 @@ void StartFrameWriteTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+
 	static color = 0;
+	static uint16_t rowCounter;
 	uint16_t colors[]  = {COLOR_RED, COLOR_BLUE, COLOR_WHITE,COLOR_GREEN};
   for(;;)
   {
 	  uint16_t chosenColor = colors[color%4];
 	  ILI9341_GFX_FrameBuffer_t *fb;
 	  osMessageQueueGet(FreeFrameQueueHandle, &fb, NULL, osWaitForever);
-	  ILI9341_WriteStripe(fb);
-	  //ILI9341_GFX_FillScreen(fb, chosenColor);
+	  ILI9341_WriteStripe(fb, rowCounter);
 	  osMessageQueuePut(FrameTxQueueHandle, &fb, 0, osWaitForever);
-	  color++;
-	  osDelay(1);
+	  rowCounter++;
+	  osDelay(2);
   }
   /* USER CODE END 5 */
 }
@@ -471,7 +472,7 @@ void StartFrameTxTask(void *argument)
 	  osMessageQueueGet(FrameTxQueueHandle, &fb, NULL, osWaitForever);
 	  ILI9341_Transmit_Frame1(fb->data);
 	  osMessageQueuePut(FreeFrameQueueHandle, &fb, 0, osWaitForever);
-    osDelay(10);
+    osDelay(2);
   }
   /* USER CODE END StartFrameTxTask */
 }
