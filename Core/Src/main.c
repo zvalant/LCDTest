@@ -1,35 +1,30 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <ili9341_gfx.h>
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
 #include "ili9341_driver.h"
-#include "ili9341_config.h"
-//#include "ILI9341_STM32_Driver.h"
-//#include "ILI9341_GFX.h"
-
-
-
+#include "ili9341_gfx.h"
 
 //SPI_HandleTypeDef hspi1;
 
@@ -37,10 +32,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 
-
 // Simple test pattern
-
-
 
 /* USER CODE END Includes */
 
@@ -51,6 +43,18 @@ static void MX_SPI1_Init(void);
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+ILI9341_GFX_FrameBuffer_t frameBuffer1;
+ILI9341_GFX_FrameBuffer_t frameBuffer2;
+ILI9341_GFX_FrameBuffer_t frameBuffer3;
+
+ILI9341_GFX_FrameBuffer_t *buf1 = &frameBuffer1;
+ILI9341_GFX_FrameBuffer_t *buf2 = &frameBuffer2;
+ILI9341_GFX_FrameBuffer_t *buf3 = &frameBuffer2;
+
+
+
+
 
 /* USER CODE END PD */
 
@@ -66,6 +70,35 @@ COM_InitTypeDef BspCOMInit;
 SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
 
+/* Definitions for FrameWriteTask */
+osThreadId_t FrameWriteTaskHandle;
+const osThreadAttr_t FrameWriteTask_attributes = {
+  .name = "FrameWriteTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for FrameTxTask */
+osThreadId_t FrameTxTaskHandle;
+const osThreadAttr_t FrameTxTask_attributes = {
+  .name = "FrameTxTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal,
+};
+/* Definitions for FreeFrameQueue */
+osMessageQueueId_t FreeFrameQueueHandle;
+const osMessageQueueAttr_t FreeFrameQueue_attributes = {
+  .name = "FreeFrameQueue"
+};
+/* Definitions for FrameTxQueue */
+osMessageQueueId_t FrameTxQueueHandle;
+const osMessageQueueAttr_t FrameTxQueue_attributes = {
+  .name = "FrameTxQueue"
+};
+/* Definitions for DmaTxComplete */
+osSemaphoreId_t DmaTxCompleteHandle;
+const osSemaphoreAttr_t DmaTxComplete_attributes = {
+  .name = "DmaTxComplete"
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -75,6 +108,9 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
+void StartFrameWriteTask(void *argument);
+void StartFrameTxTask(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -116,14 +152,71 @@ int main(void)
   MX_DMA_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  // First test raw SPI data transmission
+	static ILI9341_GFX_FrameBuffer_t gfx_FrameBuffer;
+	ILI9341_Result_t result;
+	if ((result = ILI9341_Driver_Init()) != ILI9341_SYSTEM_OK)
+		return result;
+	if ((result = ILI9341_GFX_Init(&gfx_FrameBuffer)) != ILI9341_SYSTEM_OK)
+		return result;
+	ILI9341_GFX_Init(buf1);
+	ILI9341_GFX_Init(buf2);
+	ILI9341_GFX_Init(buf3);
 
 
-  // Initialize display
-  ILI9341_Init();
-  //basic screen Test
-  ILI9341_Test();
+	// Initialize display
+	//basic screen Test
+	ILI9341_Test(&gfx_FrameBuffer);
   /* USER CODE END 2 */
+
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of DmaTxComplete */
+  DmaTxCompleteHandle = osSemaphoreNew(1, 0, &DmaTxComplete_attributes);
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* creation of FreeFrameQueue */
+  FreeFrameQueueHandle = osMessageQueueNew (5, sizeof(uint32_t), &FreeFrameQueue_attributes);
+
+  /* creation of FrameTxQueue */
+  FrameTxQueueHandle = osMessageQueueNew (5, sizeof(uint32_t), &FrameTxQueue_attributes);
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  osMessageQueuePut(FreeFrameQueueHandle, &buf1, 0, 0);
+  osMessageQueuePut(FreeFrameQueueHandle, &buf2, 0, 0);
+  osMessageQueuePut(FreeFrameQueueHandle, &buf3, 0, 0);
+
+
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of FrameWriteTask */
+  FrameWriteTaskHandle = osThreadNew(StartFrameWriteTask, NULL, &FrameWriteTask_attributes);
+
+  /* creation of FrameTxTask */
+  FrameTxTaskHandle = osThreadNew(StartFrameTxTask, NULL, &FrameTxTask_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+
+
+  /* USER CODE END RTOS_EVENTS */
 
   /* Initialize leds */
   BSP_LED_Init(LED_GREEN);
@@ -144,15 +237,19 @@ int main(void)
     Error_Handler();
   }
 
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+	while (1) {
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+	}
   /* USER CODE END 3 */
 }
 
@@ -171,7 +268,7 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
 
   while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
@@ -183,9 +280,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 2;
-  RCC_OscInitStruct.PLL.PLLN = 72;
-  RCC_OscInitStruct.PLL.PLLP = 4;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLN = 220;
+  RCC_OscInitStruct.PLL.PLLP = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 5;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
@@ -202,7 +299,7 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
@@ -237,7 +334,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -257,7 +354,7 @@ static void MX_SPI1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI1_Init 2 */
-  __HAL_SPI_ENABLE(&hspi1);
+	__HAL_SPI_ENABLE(&hspi1);
   /* USER CODE END SPI1_Init 2 */
 
 }
@@ -273,7 +370,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA1_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
 
 }
@@ -330,6 +427,78 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
+/* USER CODE BEGIN Header_StartFrameWriteTask */
+/**
+  * @brief  Function implementing the FrameWriteTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartFrameWriteTask */
+void StartFrameWriteTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+
+	static color = 0;
+	static uint16_t rowCounter;
+	uint16_t colors[]  = {COLOR_RED, COLOR_BLUE, COLOR_WHITE,COLOR_GREEN};
+  for(;;)
+  {
+	  uint16_t chosenColor = colors[color%4];
+	  ILI9341_GFX_FrameBuffer_t *fb;
+	  osMessageQueueGet(FreeFrameQueueHandle, &fb, NULL, osWaitForever);
+	  ILI9341_WriteStripe(fb, rowCounter);
+	  osMessageQueuePut(FrameTxQueueHandle, &fb, 0, osWaitForever);
+	  rowCounter++;
+	  osDelay(2);
+  }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartFrameTxTask */
+/**
+* @brief Function implementing the FrameTxTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartFrameTxTask */
+void StartFrameTxTask(void *argument)
+{
+  /* USER CODE BEGIN StartFrameTxTask */
+  /* Infinite loop */
+  for(;;)
+  {
+	  ILI9341_GFX_FrameBuffer_t *fb;
+	  osMessageQueueGet(FrameTxQueueHandle, &fb, NULL, osWaitForever);
+	  ILI9341_Transmit_Frame1(fb->data);
+	  osMessageQueuePut(FreeFrameQueueHandle, &fb, 0, osWaitForever);
+    osDelay(2);
+  }
+  /* USER CODE END StartFrameTxTask */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM6 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM6)
+  {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
@@ -337,11 +506,10 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 

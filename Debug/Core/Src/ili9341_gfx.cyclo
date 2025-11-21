@@ -1,5 +1,10 @@
-../Core/Src/ili9341_gfx.c:14:6:ILI9341_RGB565WritePixel	1
-../Core/Src/ili9341_gfx.c:24:6:ILI9341_HexWritePixel	1
-../Core/Src/ili9341_gfx.c:33:6:ILI9341_StripeTest	7
-../Core/Src/ili9341_gfx.c:73:6:ILI9341_RGB565FillScreen	2
-../Core/Src/ili9341_gfx.c:83:6:ILI9341_Test	2
+../Core/Src/ili9341_gfx.c:16:10:GetBufferIndex	1
+../Core/Src/ili9341_gfx.c:20:6:ValidCoordinates	3
+../Core/Src/ili9341_gfx.c:24:22:ILI9341_GFX_Init	2
+../Core/Src/ili9341_gfx.c:39:22:ILI9341_GFX_Clear	1
+../Core/Src/ili9341_gfx.c:47:22:ILI9341_GFX_FillScreen	3
+../Core/Src/ili9341_gfx.c:66:22:ILI9341_GFX_FillScreen1	3
+../Core/Src/ili9341_gfx.c:82:22:ILI9341_GFX_SetPixel	2
+../Core/Src/ili9341_gfx.c:98:22:ILI9341_StripeTest	7
+../Core/Src/ili9341_gfx.c:131:22:ILI9341_WriteStripe	7
+../Core/Src/ili9341_gfx.c:162:22:ILI9341_Test	4
